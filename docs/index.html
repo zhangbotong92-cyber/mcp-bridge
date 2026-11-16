@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mcp-bridge · 把国内模型接进你的 agent</title>
+<style>
+  :root{
+    --bg:#0b1116; --panel:#121b23; --line:#1e2b36; --text:#e8eef6;
+    --muted:#93a4b8; --accent:#5eead4; --accent2:#3b82f6; --warn:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.65}
+  a{color:var(--accent)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .badge{display:inline-block;font-size:13px;color:var(--accent);
+         border:1px solid var(--accent);border-radius:99px;padding:3px 12px;margin-bottom:20px}
+  h1{font-size:40px;line-height:1.25;margin:0 0 14px;letter-spacing:-.5px}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--muted);font-size:18px;margin:0 0 26px;max-width:640px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-block;padding:11px 20px;border-radius:10px;text-decoration:none;
+       font-weight:600;font-size:15px;border:1px solid var(--line)}
+  .btn.primary{background:var(--accent);color:#04211c;border-color:var(--accent)}
+  .btn.ghost{color:var(--text)}
+  section{padding:46px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:24px;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .card h3{margin:0 0 8px;font-size:16px}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  pre{background:#060a0e;border:1px solid var(--line);border-radius:12px;padding:16px;
+      overflow:auto;font-size:13px;line-height:1.55}
+  code{font-family:"JetBrains Mono",Consolas,monospace}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  .price{font-weight:700;color:var(--accent);white-space:nowrap}
+  .note{color:var(--muted);font-size:13px}
+  details{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:10px;background:var(--panel)}
+  summary{cursor:pointer;font-weight:600}
+  details p{color:var(--muted);font-size:14px;margin:10px 0 0}
+  footer{padding:34px 0 60px;color:var(--muted);font-size:13px}
+  .kbd{background:#1b2733;border-radius:5px;padding:1px 6px;font-size:12px}
+  .stamp{color:var(--warn);font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="badge">零依赖 · Python 3.8+ · 本地用量账本</div>
+    <h1>把国内模型接进<br><span>你的 agent</span></h1>
+    <p class="sub">
+      用 Claude Code、Cursor 这些客户端，但模型绑死海外？mcp-bridge 把 DeepSeek、通义、智谱、Kimi
+      统一接成一个 MCP 服务：客户端只配一次，断网自动回落到本机模型，每次调用都记成本。
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#price">看报价</a>
+      <a class="btn ghost" href="#start">30 秒看它跑</a>
+    </div>
+  </div>
+</header>
+
+<section id="start">
+  <div class="wrap">
+    <h2>先看它跑，再谈别的</h2>
+    <p class="note">下面这段不是截图，是真实会话记录（客户端 → 服务端 → 模型 → 回执）。</p>
+    <pre><code># 客户端调用
+{"name":"bridge_chat","arguments":{"provider":"local","prompt":"只回四个字：链路已通","project":"ACME-官网"}}
+
+# 服务端回执
+{"content":[{"type":"text","text":"{\"text\": \"链路已通\", \"model\": \"qwen2.5vl:3b\",
+  \"latency_ms\": 63, \"cost_cny\": 0.0}"}]}
+
+# 看账（按项目分）
+$ python server.py --report 7 --group-by project
+最近 7 天调用：19 次，tokens 合计 351，花费 ¥0.0000
+key             calls       tok_in      tok_out   cost_cny   avg_ms
+(未标记)             17          208          105     0.0000      171
+BETA-客服             1           11            8     0.0000        0
+ACME-官网             1           11            8     0.0000        0</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>它解决的三件事</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>换模型不用改配置</h3>
+        <p>四处配置管住四家模型。key 走环境变量，不写死在文件里；本地端点自动发现已装模型名。</p>
+      </div>
+      <div class="card">
+        <h3>账算得清</h3>
+        <p>每次调用落一条本地记录：token、成本、延迟、失败原因。可按项目/客户分账，数据不出你的机器。</p>
+      </div>
+      <div class="card">
+        <h3>断网不瘫</h3>
+        <p>上游不通时自动落到本机 ollama，并在回执里明确标注降级——不假装成功。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>为什么值得信赖</h2>
+    <table>
+      <tr><th>项</th><th>状态</th></tr>
+      <tr><td>MCP 协议链路</td><td>7 项自检全过（initialize / tools/list / chat / cost / usage / 错误路径）</td></tr>
+      <tr><td>真实上游调用</td><td>已跑通（本机 ollama，返回「链路已通」，冷启 4.2s / 热 70ms）</td></tr>
+      <tr><td>按项目分账</td><td>已跑通</td></tr>
+      <tr><td>云端 provider</td><td class="stamp">未验证：本机没有云厂商 key，只有 mock 与错误路径被测过</td></tr>
+      <tr><td>流式输出</td><td class="stamp">尚未实现（v0.4）</td></tr>
+    </table>
+    <p class="note">没做到的事写在上面，比藏起来强。</p>
+  </div>
+</section>
+
+<section id="price">
+  <div class="wrap">
+    <h2>报价</h2>
+    <table>
+      <tr><th>档位</th><th>价格</th><th>交付</th><th>工期</th></tr>
+      <tr>
+        <td>陪跑包</td><td class="price">¥499</td>
+        <td>3 小时一对一远程：装桥、配 1 家模型、客户端接上；留下能跑的配置 + 说明 + 自检脚本。跑不通不收费。</td>
+        <td>当天</td>
+      </tr>
+      <tr>
+        <td>接入包</td><td class="price">¥4,000</td>
+        <td>部署一套 mcp-bridge；配 2 个模型端点；客户端接入演示（含回滚）；7 天答疑。</td>
+        <td>2 个工作日</td>
+      </tr>
+      <tr>
+        <td>定制包</td><td class="price">¥9,800</td>
+        <td>含接入包全部；把你的 3–5 个业务接口封装成 MCP 工具；按项目统计费用；回归测试；30 天答疑。</td>
+        <td>5 个工作日</td>
+      </tr>
+      <tr>
+        <td>驻场包</td><td class="price">¥3,000 / 天</td>
+        <td>盘点 → 定位成本瓶颈 → 切换 → 上线验证。承诺：三天内账单降 40%，降不下来不收这三天。</td>
+        <td>按需</td>
+      </tr>
+    </table>
+    <p class="note" style="margin-top:14px">
+      付款：工商银行 <span class="kbd">（转账信息私聊发送）</span>（海桥）。转账备注写「服务费 + 项目简称」，便于当天对账开工。
+      可开个人代开普票（1% 档）；专票需公司主体。
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>常见问题</h2>
+    <details><summary>开源那么多，为什么要付费？</summary>
+      <p>开源给的是代码，付费买的是「你这套环境能跑起来」+ 出问题有人兜。你要是自己能调，直接用开源版，我不劝。</p></details>
+    <details><summary>数据会不会出境？</summary>
+      <p>默认路径就是本机或你内网的端点；用量账本存在本地 SQLite，不上传。</p></details>
+    <details><summary>支持哪些客户端？</summary>
+      <p>任何支持 MCP 的：Claude Code、Cursor、Cline、Continue 等。配置片段由安装脚本直接生成。</p></details>
+    <details><summary>跑不通怎么办？</summary>
+      <p>陪跑包当天跑不通不收钱；接入包按验收标准（能跑通 + 通过回归测试）结算。</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>海桥 · 1024720334@qq.com · 独立开发者，做模型接入层。</p>
+    <p class="note">页面最后更新：2026-11-17。报价 30 天内有效；价格含标准交付，不含模型 API 费用与你方服务器费用。</p>
+  </div>
+</footer>
+
+</body>
+</html>
