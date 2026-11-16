@@ -1,0 +1,53 @@
+{
+  "_note": "价格为示例值，单位：人民币 / 1M tokens。上线前按厂商官网更新；base_url 必须是 OpenAI 兼容端点。",
+  "providers": {
+    "deepseek": {
+      "base_url": "https://api.deepseek.com/v1",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "models": ["deepseek-chat", "deepseek-reasoner"],
+      "prices": {
+        "deepseek-chat": { "in": 2.0, "out": 8.0 },
+        "deepseek-reasoner": { "in": 4.0, "out": 16.0 }
+      },
+      "timeout": 60
+    },
+    "moonshot": {
+      "base_url": "https://api.moonshot.cn/v1",
+      "api_key_env": "MOONSHOT_API_KEY",
+      "models": ["kimi-k2-turbo", "moonshot-v1-128k"],
+      "prices": {
+        "kimi-k2-turbo": { "in": 4.0, "out": 16.0 },
+        "moonshot-v1-128k": { "in": 60.0, "out": 60.0 }
+      },
+      "timeout": 60
+    },
+    "zhipu": {
+      "base_url": "https://open.bigmodel.cn/api/paas/v4",
+      "api_key_env": "ZHIPU_API_KEY",
+      "models": ["glm-4.6", "glm-4-flash"],
+      "prices": {
+        "glm-4.6": { "in": 1.0, "out": 4.0 },
+        "glm-4-flash": { "in": 0.0, "out": 0.0 }
+      },
+      "timeout": 60
+    },
+    "dashscope": {
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "models": ["qwen-plus", "qwen-max"],
+      "prices": {
+        "qwen-plus": { "in": 0.8, "out": 2.0 },
+        "qwen-max": { "in": 2.4, "out": 9.6 }
+      },
+      "timeout": 60
+    },
+    "local": {
+      "base_url": "http://127.0.0.1:11434/v1",
+      "discover": true,
+      "api_key_env": "",
+      "models": ["qwen2.5-coder:7b"],
+      "prices": { "qwen2.5-coder:7b": { "in": 0.0, "out": 0.0 } },
+      "timeout": 120
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# 运行时产物，不进仓库
+config.json
+usage.db
+usage.db-*
+*.log
+__pycache__/
+*.pyc
+.venv/
+demo/transcript-*.md
