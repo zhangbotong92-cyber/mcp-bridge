@@ -32,6 +32,8 @@ python server.py --report 7      # 最近 7 天的调用与花费
 
 没配任何 key 也能跑通链路（自动降级 mock），可以先看工具列表再决定填哪家。
 
+装完不确定成没成？→ **[60 秒验证清单](docs/verify.md)**
+
 ## 为什么是这个
 
 - `@modelcontextprotocol/sdk` 周下载 **89,463,331**，已经同时超过 `@anthropic-ai/sdk`（70.7M）与 `openai`（58.8M）。接入层已经标准化到协议，做工具的人押协议不押厂商。
@@ -160,6 +162,7 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 成本是**估算**（CJK 按 1 字≈1 token），不是计费依据；要精确就对回包里的 `usage`。
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
+
 
 
 
