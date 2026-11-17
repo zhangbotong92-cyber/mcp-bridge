@@ -116,15 +116,12 @@ function el(id){ return document.getElementById(id); }
 function renderClient(){
   const p = PRESETS[el("provider").value];
   const env = p.env ? { [p.env]: "sk-你的key" } : {};
-  const obj = {
-    mcpServers: {
-      bridge: {
-        command: "python",
-        args: [el("srv").value, "--config", el("cfg").value],
-        env: env
-      }
-    }
+  const server = {
+    command: "python",
+    args: [el("srv").value, "--config", el("cfg").value]
   };
+  if (Object.keys(env).length) { server.env = env; }   // 本地端点不需要 env，就别塞空对象
+  const obj = { mcpServers: { bridge: server } };
   const client = el("client").value;
   let hint = "";
   if (client === "cline") { hint = "// Cline: 设置 → MCP Servers → 编辑 JSON，粘 mcpServers 内部即可\n"; }
