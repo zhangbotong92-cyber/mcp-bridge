@@ -19,67 +19,98 @@
 }
 </script>
 <style>
-  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.75}
-  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 80px}
-  h1{font-size:32px;line-height:1.3;margin:0 0 10px}
+  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.78}
+  .wrap{max-width:740px;margin:0 auto;padding:56px 22px 80px}
+  h1{font-size:31px;line-height:1.34;margin:0 0 10px}
   .meta{color:#93a4b8;font-size:14px;margin-bottom:34px}
-  h2{font-size:21px;margin:38px 0 12px;border-left:3px solid #5eead4;padding-left:12px}
+  h2{font-size:20px;margin:40px 0 12px}
   p,li{font-size:16px;color:#cfdae6}
   code{background:#151f29;padding:2px 6px;border-radius:5px;font-size:14px;color:#5eead4}
   pre{background:#070c11;border:1px solid #1e2b36;border-radius:10px;padding:14px;overflow:auto;font-size:13px;color:#b8c7d6}
-  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
   th,td{text-align:left;padding:10px;border-bottom:1px solid #1e2b36;vertical-align:top}
   th{color:#93a4b8}
-  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:22px 0}
+  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:24px 0}
   a{color:#5eead4}
-  .cta{background:#0e2220;border:1px solid #5eead4;border-radius:12px;padding:20px;margin:34px 0}
+  .cta{border-left:3px solid #5eead4;padding:6px 0 6px 16px;margin:36px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <h1>Cursor / Claude Code 在国内用不了模型？按这个顺序查</h1>
-<p class="meta">2026-11-17 · 海桥 · 排查耗时按顺序递增，前两步就能解决大多数</p>
+<p class="meta">2026-11-17 · 海桥</p>
 
-<p>先给结论：这类问题九成不是"网络坏了"，而是三层配置里的某一层没对上。按下面顺序查，每步都有明确的判据。</p>
+<p>上个月帮一个朋友看他那台笔记本。Cursor 打开，模型选了 Claude，回车，转圈，然后一行小字：<code>Model not available</code>。他先把 Cursor 卸了重装，又把代理换了两个节点，一晚上没了。</p>
 
-<h2>第一层：客户端有没有真的拿到 key</h2>
-<p>最容易踩的坑：你在系统里设了环境变量，<strong>但客户端进程根本读不到</strong>。GUI 程序经常不继承你终端里的变量。</p>
+<p>我让他跑了一条命令，三秒钟定位到问题：他把 key 填进了系统环境变量，但 Cursor 是图形程序，压根没继承那个变量。</p>
+
+<p>这类事我见过太多次。写下来，按排查耗时从短到长排。</p>
+
+<h2>先花三秒分清是客户端的问题还是 key 的问题</h2>
+
+<p>别一上来就翻设置。用 curl 直接打一次，把客户端排除在外：</p>
+
 <pre>curl -H "Authorization: Bearer $KEY" $BASE/chat/completions \
   -d '{"model":"...","messages":[{"role":"user","content":"hi"}]}'</pre>
-<p>curl 通了 → 问题在客户端；curl 也不通 → 问题在 key 或地址。这一条能省掉一半时间。</p>
 
-<h2>第二层：模型名对不对</h2>
-<p><code>Model not available</code>、404 这类，八成是名字不匹配。各家对同一模型的写法不一样，本地 ollama 更是——<code>ollama list</code> 里显示什么就得写什么，不能照抄教程。</p>
-<p>两个动作：① 请求一次 <code>/models</code> 看服务端认哪些名字；② 把返回的 id 原样填回去。</p>
+<p>能出 JSON，问题就在客户端那一侧；报 401 或连不上，问题在 key 或者地址，跟客户端无关。这一步做完，能省掉很多在设置页里反复点的时间。我见过有人在客户端里改了两个小时，最后发现是 key 复制时多带了一个空格。</p>
 
-<h2>第三层：Base URL 的三个细节</h2>
+<h2>名字对不上，报错不会告诉你</h2>
+
+<p><code>Model not available</code>、404，这类八成是名字问题。各家对同一个模型的写法不一样，DeepSeek 要 <code>deepseek-chat</code>，本地 ollama 更直接——<code>ollama list</code> 里显示的是什么，你就得写什么。</p>
+
+<p>教程里抄来的名字经常是半年前的。别猜，直接问服务端认哪些：</p>
+
+<pre>curl -H "Authorization: Bearer $KEY" $BASE/models</pre>
+
+<p>返回的 <code>data[].id</code> 原样填回去。这一步我后来干脆写进程序里了，配置里加个 <code>"discover": true</code>，让它自己去问，省掉一整类"名字猜错"的问题。</p>
+
+<h2>地址里那三个符号</h2>
+
+<p>Base URL 看着简单，错起来很隐蔽，因为报错经常指向别的地方。</p>
+
 <table>
-  <tr><th>细节</th><th>错误表现</th></tr>
-  <tr><td>末尾多一个斜杠</td><td>404 或 401，容易误判成 key 问题</td></tr>
-  <tr><td>该不该带 <code>/v1</code></td><td>带错报 404，不报"地址错"</td></tr>
-  <tr><td>http 还是 https</td><td>本地服务写 https 会直接连不上</td></tr>
+  <tr><th>写错的地方</th><th>你看到的报错</th></tr>
+  <tr><td>末尾多一个斜杠</td><td>404 或 401</td></tr>
+  <tr><td>该带 <code>/v1</code> 没带，或者反过来</td><td>404</td></tr>
+  <tr><td>本地服务写成 <code>https://</code></td><td>直接连不上，没有 HTTP 状态码</td></tr>
 </table>
 
-<h2>都不是？还有一层：协议协商</h2>
-<p>Cursor / Claude Code 里有个隐藏坑：HTTP/2 协商失败会表现为"请求发出去了但没回"，超时报错里看不出任何线索。把客户端设置里的 HTTP Compatibility Mode 切到 1.1 再试一次，很多人这一步就好了。</p>
+<p>照抄之前，先 curl 一下自己的地址，能返回 JSON 再往下走。这一步二十秒，比在客户端里试错快。</p>
 
-<h2>为什么反复出现：客户端绑死了模型</h2>
-<p>上面每一步都是"客户端 ↔ 模型"之间的对接细节。只要你的客户端绑死某一家，每次换模型、每次对方改区域策略，这些细节就要重来一遍。</p>
+<h2>还有一种，看起来像网络问题其实不是</h2>
+
+<p>请求发出去了，界面一直转，最后超时，错误信息里什么线索都没有。我在自己的日志里撞过这个：HTTP/2 协商失败，连接看着是通的。</p>
+
+<p>把客户端的 HTTP Compatibility Mode 切到 1.1，很多人这一步就好了。如果你不确定要不要试，反正它不改变任何配置，试错成本为零。</p>
+
 <div class="box">
-<p>稳的做法是把模型层抽出来：客户端只认一个 OpenAI 兼容入口，背后接哪家随时换。这就是我做 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a> 的原因——它是 MCP 服务，把 DeepSeek / 通义 / 智谱 / Kimi 与本地 ollama 收成一个入口，客户端只配一次；每次调用落本地账本，能按项目分账；上游不通时回落本机模型，并在回执里标注降级。</p>
-<p>零依赖，Python 3.8+，带 17 项环境体检（<code>--doctor</code>），Windows / macOS / Linux 都有一键安装脚本。</p>
+<p>顺带说个旁证：Claude Code 那边 <code>local proxy failed</code> 也常是同一类问题——代理软件和客户端在协议层没谈拢，不是你的 key 有问题。</p>
 </div>
 
-<h2>装完怎么确认成没成</h2>
-<p>看 <a href="verify.md">60 秒验证清单</a>：自检 7/7 → 体检 0 失败 → mock 调通 → 账本能出数 → 客户端能看到工具。任何一步不对，那一步的输出就能定位问题。</p>
+<h2>为什么这些坑会反复出现</h2>
+
+<p>上面每一步都不难，难的是它们会重复。你换一家模型，地址、名字、鉴权方式全变；对方调整一次区域策略，整套链路要重新验一遍。</p>
+
+<p>根子在于客户端把模型钉死了。它认的是某一家的地址和某一家的名字，换人就等于换系统。</p>
+
+<p>我这半年一直在做这件事的另一半：把模型那层抽出来，客户端只认一个入口。就是 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a>，一个 MCP 服务，背后接 DeepSeek、通义、智谱、Kimi 或者你本机的 ollama。换模型只改一个配置文件，客户端不动。</p>
+
+<p>有个细节是我自己吃了亏才加的：上游不通时落回本机模型，同时在回执里明确写"这次是降级执行的"。不假装成功——不然你会在第二天才发现昨晚跑的东西全是用错模型出的。</p>
+
+<p>另外每次调用都落一条本地记录，token、成本、延迟、失败原因，可以按项目分开。这个功能是被一个做外包的朋友催出来的，他要同时伺候三个客户，月底算不清账。</p>
+
+<h2>装完怎么确定真的成了</h2>
+
+<p>别靠感觉。跑 <a href="verify.md">这五步</a>：自检七项、体检零失败、mock 能调通、账本能出数、客户端能看到工具。哪一步断了，那一步的输出就是线索。</p>
 
 <div class="cta">
-<p><strong>卡在某一步？把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。</strong></p>
-<p>要我远程帮你配通：¥499，三小时，跑不通不收费。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
+<p>如果你已经卡了半天，把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。17 项检查，通常能直接指出是哪一层。</p>
+<p>要我远程帮你配通也行：¥499，三小时，跑不通不收钱。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
 </div>
 
-<p class="meta">—— 海桥 · 做模型接入层 · <a href="./">项目主页</a></p>
+<p class="meta">—— 海桥，做模型接入层。项目主页在<a href="./">这里</a>。</p>
 </div>
 </body>
 </html>

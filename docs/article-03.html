@@ -19,107 +19,115 @@
 }
 </script>
 <style>
-  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.75}
-  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 80px}
-  h1{font-size:31px;line-height:1.32;margin:0 0 10px}
-  .meta{color:#93a4b8;font-size:14px;margin-bottom:32px}
-  h2{font-size:20px;margin:36px 0 12px;border-left:3px solid #5eead4;padding-left:12px}
+  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.78}
+  .wrap{max-width:740px;margin:0 auto;padding:56px 22px 80px}
+  h1{font-size:30px;line-height:1.36;margin:0 0 10px}
+  .meta{color:#93a4b8;font-size:14px;margin-bottom:34px}
+  h2{font-size:20px;margin:40px 0 12px}
   p,li{font-size:16px;color:#cfdae6}
   code{background:#151f29;padding:2px 6px;border-radius:5px;font-size:14px;color:#5eead4}
   pre{background:#070c11;border:1px solid #1e2b36;border-radius:10px;padding:14px;overflow:auto;font-size:13px;color:#b8c7d6}
-  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
   th,td{text-align:left;padding:10px;border-bottom:1px solid #1e2b36;vertical-align:top}
   th{color:#93a4b8}
-  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:22px 0}
+  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:24px 0}
   a{color:#5eead4}
-  .cta{background:#0e2220;border:1px solid #5eead4;border-radius:12px;padding:20px;margin:34px 0}
+  .cta{border-left:3px solid #5eead4;padding:6px 0 6px 16px;margin:36px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>MCP Server 怎么接国内模型：一步一步配</h1>
-<p class="meta">2026-11-17 · 海桥 · 配置片段可直接复制，命令都实测过</p>
+<h1>MCP Server 怎么接国内模型</h1>
+<p class="meta">2026-11-17 · 海桥</p>
 
-<p>这篇只解决一件事：让你的 MCP 客户端（Claude Code / Cursor / Cline）调到国内的模型。不讨论"为什么要 MCP"，直接给能跑的东西。</p>
+<p>连着帮人配了七八台机器之后，我发现同一个误会反复出现：很多人以为"接 MCP"和"接国内模型"是一件事，其实它们管的是两条不同的线。搞混之后，配置就会写在一个用不上的地方，然后报错看起来毫无道理。</p>
 
-<h2>第 0 步：先确认你要的是哪一层</h2>
-<table>
-  <tr><th>你想要的</th><th>要配的是</th></tr>
-  <tr><td>客户端能用国内模型发请求</td><td>一个 OpenAI 兼容的 <strong>模型端点</strong>（Base URL + Key + 模型名）</td></tr>
-  <tr><td>客户端能调用外部工具（读文件、查库、调接口）</td><td>一个 <strong>MCP server</strong></td></tr>
-  <tr><td>两者都要</td><td>能同时做这两件事的桥（下文给的就是）</td></tr>
-</table>
+<h2>先弄清你在配哪一样</h2>
 
-<h2>第 1 步：拿到三样东西</h2>
-<pre>Base URL   例如 https://api.deepseek.com/v1
-API Key    各家控制台自己签
-模型名     从 /models 接口拿，不要照抄教程</pre>
+<p>客户端要发请求给模型，需要一个地址、一把钥匙、一个模型名。这三样凑齐，模型那边就通了。</p>
 
-<p>取模型名这一步别猜：</p>
+<p>客户端要能读文件、查数据库、调你自己的接口，这部分跟模型无关，走的是 MCP。MCP server 是给客户端加工具的地方。</p>
+
+<p>两件事都得有，做法就分成两种：装两个东西分别配；或者找一个既能当 OpenAI 兼容端点、又对外提供 MCP 工具的东西。后面这种就是我写的那个，不过先把通用的部分说完，你不用它也能照着配。</p>
+
+<h2>三样东西从哪拿</h2>
+
+<p>地址和 key 在厂商控制台。这里唯一容易出错的是模型名，因为教程里的名字经常已经过期。别信任何文章（包括这篇），直接问服务端：</p>
+
 <pre>curl -H "Authorization: Bearer $KEY" $BASE/models</pre>
-<p>返回里 <code>data[].id</code> 就是能用的名字。本地 ollama 同理：<code>ollama list</code> 显示什么就写什么。</p>
 
-<h2>第 2 步：写配置文件</h2>
+<p>返回里的 <code>data[].id</code> 就是能用的值。本机 ollama 没有这个顾虑，<code>ollama list</code> 显示什么就写什么，一个字符都别改。</p>
+
+<h2>配置文件长什么样</h2>
+
+<p>下面这段是给桥用的，你可以只看结构：</p>
+
 <pre>{
   "providers": {
     "deepseek": {
       "base_url": "https://api.deepseek.com/v1",
       "api_key_env": "DEEPSEEK_API_KEY",
-      "models": ["deepseek-chat"],
-      "prices": { "deepseek-chat": { "in": 2.0, "out": 8.0 } }
+      "models": ["deepseek-chat"]
     },
     "local": {
       "base_url": "http://127.0.0.1:11434/v1",
-      "discover": true,
-      "models": []
+      "discover": true
     }
   }
 }</pre>
 
-<div class="box">
-<p>两个关键决定：</p>
-<p>① <strong>key 写在环境变量名里</strong>（<code>api_key_env</code>），不要明码写进文件——文件会被提交、被分享、被备份。</p>
-<p>② <code>discover: true</code> 让程序自己去问端点有哪些模型，省掉"名字猜错"这一整类问题。</p>
-</div>
+<p>有两个地方值得说。key 这里写的是环境变量名，不是 key 本身。原因很实际：配置文件会被提交、被丢进压缩包、被同步到网盘，key 混在里面，早晚要泄露一次。</p>
 
-<h2>第 3 步：注册到客户端</h2>
+<p><code>discover</code> 是让程序自己去问端点有哪些模型，问不到就退回配置里的值。这是被人问烦了才加的：几乎每个来找我的人，第一次都是模型名写错。</p>
+
+<h2>注册到客户端</h2>
+
 <pre>{
   "mcpServers": {
     "bridge": {
       "command": "python",
-      "args": ["/绝对路径/server.py", "--config", "/绝对路径/config.json"],
+      "args": ["D:\\mcp-bridge\\server.py", "--config", "D:\\mcp-bridge\\config.json"],
       "env": { "DEEPSEEK_API_KEY": "sk-..." }
     }
   }
 }</pre>
-<p>文件位置：Claude Code 用 <code>~/.claude.json</code> 或项目里的 <code>.mcp.json</code>；Cursor 用 <code>~/.cursor/mcp.json</code>。</p>
-<p><strong>改完必须重启客户端</strong>，MCP 配置不做热加载；路径必须是绝对路径。</p>
 
-<h2>第 4 步：三个高频报错怎么读</h2>
+<p>Claude Code 是 <code>~/.claude.json</code> 或者项目下的 <code>.mcp.json</code>，Cursor 是 <code>~/.cursor/mcp.json</code>。路径必须写绝对路径，用相对路径的十次有九次找不到文件。</p>
+
+<p>改完要重启客户端。这一点没有例外，我试过等它自己刷新，等了半小时。</p>
+
+<h2>报错怎么读</h2>
+
 <table>
-  <tr><th>报错</th><th>实际原因</th><th>动作</th></tr>
-  <tr><td>401 / Unauthorized</td><td>key 没进客户端进程，或 base 多/少了 <code>/v1</code></td><td>先用 curl 直连验证，再检查客户端 <code>env</code> 段</td></tr>
-  <tr><td>404 / model not found</td><td>模型名不匹配</td><td>打一次 <code>/models</code>，原样抄 id</td></tr>
-  <tr><td>超时 / local proxy failed</td><td>HTTP/2 协商或代理层</td><td><code>curl -v</code> 看卡在 DNS/TCP/TLS；客户端切 HTTP 1.1</td></tr>
+  <tr><th>你看到的</th><th>多半是</th><th>先做这个</th></tr>
+  <tr><td>401</td><td>key 没进客户端进程，或者地址里 <code>/v1</code> 写错</td><td>curl 直连验证，再回来查 env</td></tr>
+  <tr><td>404 / model not found</td><td>模型名不匹配</td><td>打一次 <code>/models</code>，抄 id</td></tr>
+  <tr><td>转圈然后超时</td><td>HTTP/2 协商或代理层</td><td><code>curl -v</code> 看卡在哪一步；切 HTTP 1.1</td></tr>
 </table>
 
-<h2>第 5 步：确认真的通了</h2>
-<pre>python test_stdio.py      # 协议自检 7 项
-python server.py --doctor # 环境体检 17 项
-python server.py --report 1   # 看账，确认每次调用都记下来了</pre>
-<p>三步都过，说明"客户端 → MCP server → 模型"这条链是通的。详细的期望输出见 <a href="verify.md">60 秒验证清单</a>。</p>
+<h2>确认它真的通了</h2>
+
+<p>我习惯跑三条命令，顺序是从便宜到贵：</p>
+
+<pre>python test_stdio.py          # 协议自检，七项
+python server.py --doctor     # 环境体检，十七项
+python server.py --report 1   # 账本里有没有记录</pre>
+
+<p>第一条过了说明协议通，第二条过了说明环境对，第三条出数说明调用确实发生了。三条都对但客户端还是不认，那问题一定在客户端读配置这一步，不在服务端。</p>
+
+<p>详细期望输出写在 <a href="verify.md">这份清单</a> 里。</p>
 
 <div class="box">
-<p>这套东西我打包成了 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a>：零第三方依赖，Python 3.8+，Windows / macOS / Linux 都有一键安装脚本，跑完自动做上面这五步里的检查。MIT 协议，代码可以直接读。</p>
+<p>上面这套流程，我打包成了 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a>：零第三方依赖，Python 3.8 以上，三个系统各有一键安装脚本。装完会自动把上面的检查跑一遍。MIT 协议，代码可以直接读，觉得哪里不对可以改。</p>
 </div>
 
 <div class="cta">
-<p><strong>照着配还是不通？把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。</strong></p>
-<p>要我远程帮你配通：¥499，三小时，跑不通不收费。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
+<p>照这么配还是不通，把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。</p>
+<p>要我上手帮你配：¥499，三小时，跑不通不收钱。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
 </div>
 
-<p class="meta">—— 海桥 · 做模型接入层 · <a href="./">项目主页</a></p>
+<p class="meta">—— 海桥，做模型接入层。项目主页在<a href="./">这里</a>。</p>
 </div>
 </body>
 </html>
