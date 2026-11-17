@@ -155,8 +155,10 @@ def render(report):
     s = report["summary"]
     lines.append("")
     lines.append("结果：%d 项正常，%d 项需要留意，%d 项失败" % (s["ok"], s["warn"], s["fail"]))
-    if s["fail"] == 0 and s["warn"] <= 2:
-        lines.append("可以直接用。（WARN 通常只是还没配 key）")
+    if s["fail"] == 0:
+        lines.append("没有失败项，可以直接用。")
+        if s["warn"]:
+            lines.append("WARN 只是还没配的可选项（缺 key、没装客户端、本机模型没启动），不影响云端 provider。")
     else:
         lines.append("按 FAIL 从上往下处理；WARN 里缺 key 那几条可以最后配。")
     lines.append("")

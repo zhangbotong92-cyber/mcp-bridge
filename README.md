@@ -18,6 +18,11 @@
 powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
 ```
 
+```bash
+# macOS / Linux / Git Bash 同一套流程
+sh install.sh
+```
+
 装完先跑一次体检，它会告诉你到底卡在哪：
 
 ```bash
@@ -155,6 +160,7 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 成本是**估算**（CJK 按 1 字≈1 token），不是计费依据；要精确就对回包里的 `usage`。
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
+
 
 
 

@@ -1,4 +1,4 @@
-# mcp-bridge
+﻿# mcp-bridge
 
 Expose any **OpenAI-compatible endpoint** (DeepSeek / Qwen / Zhipu GLM / Kimi / local ollama) as **MCP tools**, so Claude Code, Cursor, Cline and Continue can call the model *you* choose.
 
@@ -33,6 +33,11 @@ ACME-website        1           11            8     0.0000        0
 ```powershell
 # Windows, one command: checks Python, writes config, prints the client snippet, runs 7 self-checks
 powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
+```
+
+```bash
+# macOS / Linux / Git Bash: same flow
+sh install.sh
 ```
 
 ```bash
@@ -82,3 +87,4 @@ python demo.py             # writes a transcript of a real MCP session
 ## Licence
 
 MIT — see `LICENSE`.
+
