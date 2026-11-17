@@ -56,6 +56,8 @@
       <option value="claude">Claude Code（~/.claude.json 或项目 .mcp.json）</option>
       <option value="cursor">Cursor（~/.cursor/mcp.json）</option>
       <option value="cline">Cline（VS Code 插件设置）</option>
+      <option value="windsurf">Windsurf（~/.codeium/windsurf/mcp_config.json）</option>
+      <option value="continue">Continue（config.json 的 mcpServers）</option>
     </select>
   </div>
   <div>
@@ -66,6 +68,10 @@
       <option value="zhipu">智谱 GLM</option>
       <option value="dashscope">通义千问</option>
       <option value="local">本地 ollama</option>
+      <option value="vllm">本地 vLLM</option>
+      <option value="lmstudio">本地 LM Studio</option>
+      <option value="siliconflow">硅基流动 SiliconFlow</option>
+      <option value="openrouter">OpenRouter</option>
     </select>
   </div>
 </div>
@@ -84,7 +90,11 @@
 <pre id="out-provider"></pre>
 <button id="copy2">复制 provider 片段</button>
 
-<h2>4. 然后做什么</h2>
+<h2>4. 完整 config.json（五个厂商一次给全）</h2>
+<pre id="out-full"></pre>
+<button id="copy3">复制完整配置</button>
+
+<h2>5. 然后做什么</h2>
 <div class="step">
   <strong>重启客户端。</strong> MCP 配置不做热加载，改完必须重启，路径必须是绝对路径。
 </div>
@@ -108,7 +118,11 @@ const PRESETS = {
   moonshot:{name:"moonshot", base:"https://api.moonshot.cn/v1", env:"MOONSHOT_API_KEY", models:["kimi-k2-turbo"]},
   zhipu:{name:"zhipu", base:"https://open.bigmodel.cn/api/paas/v4", env:"ZHIPU_API_KEY", models:["glm-4.6"]},
   dashscope:{name:"dashscope", base:"https://dashscope.aliyuncs.com/compatible-mode/v1", env:"DASHSCOPE_API_KEY", models:["qwen-plus"]},
-  local:{name:"local", base:"http://127.0.0.1:11434/v1", env:"", models:[], discover:true}
+  local:{name:"local", base:"http://127.0.0.1:11434/v1", env:"", models:[], discover:true},
+  siliconflow:{name:"siliconflow", base:"https://api.siliconflow.cn/v1", env:"SILICONFLOW_API_KEY", models:["deepseek-ai/DeepSeek-V3"]},
+  openrouter:{name:"openrouter", base:"https://openrouter.ai/api/v1", env:"OPENROUTER_API_KEY", models:["deepseek/deepseek-chat"]},
+  vllm:{name:"vllm", base:"http://127.0.0.1:8000/v1", env:"", models:[], discover:true},
+  lmstudio:{name:"lmstudio", base:"http://127.0.0.1:1234/v1", env:"", models:[], discover:true}
 };
 
 function el(id){ return document.getElementById(id); }
@@ -135,7 +149,20 @@ function renderProvider(){
   el("out-provider").textContent = JSON.stringify({ providers: block }, null, 2);
 }
 
-function refresh(){ renderClient(); renderProvider(); }
+function renderFull(){
+  const all = {};
+  const order = ["deepseek","moonshot","zhipu","dashscope","siliconflow","openrouter","local","vllm","lmstudio"];
+  order.forEach(function(k){
+    const p = PRESETS[k];
+    if (!p) return;
+    const o = { base_url: p.base, api_key_env: p.env, models: p.models };
+    if (p.discover) { o.models = []; o.discover = true; }
+    all[k] = o;
+  });
+  el("out-full").textContent = JSON.stringify({ providers: all }, null, 2);
+}
+
+function refresh(){ renderClient(); renderProvider(); renderFull(); }
 
 function copy(node){
   const text = node.textContent;
@@ -155,6 +182,7 @@ function copy(node){
 });
 el("copy1").addEventListener("click", ()=>copy(el("out-client")));
 el("copy2").addEventListener("click", ()=>copy(el("out-provider")));
+el("copy3").addEventListener("click", ()=>copy(el("out-full")));
 refresh();
 </script>
 </body>
