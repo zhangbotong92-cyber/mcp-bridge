@@ -7,6 +7,9 @@
 
 **[下载 v0.3.4](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.4/mcp-bridge-0.3.4.zip)** · **[配置生成器](https://zhangbotong92-cyber.github.io/mcp-bridge/config.html)**（选两下出 JSON）· **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
 
+> **下载了但没跑通？** 跑一条 `python report.py`，它会生成一份自动脱敏的报告（系统信息、体检输出、自检结果）。
+> 把内容发到 [issue #1](https://github.com/zhangbotong92-cyber/mcp-bridge/issues/1) 或 1024720334@qq.com，免费回你一条诊断。
+
 把任意 **OpenAI 兼容端点**（DeepSeek / Kimi / 智谱 GLM / 通义千问 / 本地 ollama）接成 **MCP 工具**，让 Claude Code、Cursor、Cline、Continue 这类支持 MCP 的客户端，能直接调用你自己选的模型。
 
 零第三方依赖，Python 3.8+ 直接跑。没配 key 也能先跑通链路（自动降级 mock）。
@@ -44,6 +47,18 @@ python server.py --report 7      # 最近 7 天的调用与花费
 - **请求直连你配置的端点**（`api.deepseek.com` / 本机 ollama / 你自建的服务），中间没有我们这一层。
 
 也就是说：**你不需要信任我，只需要看一眼 `server.py`。**
+## 它和别的方式有什么不同
+
+| 方式 | 谁持有 key | 断网时 | 花费看得清吗 |
+|---|---|---|---|
+| API 中转站 | 中转站 | 停服即断 | 只有一张总账单 |
+| 客户端内置模型 | 厂商 | 断 | 看得到总额，分不清项目 |
+| 自己写适配层 | 你 | 看你怎么写 | 看你怎么写 |
+| mcp-bridge | 你（环境变量） | 回落本机模型，回执标注降级 | 每次调用一条记录，可按项目分账 |
+
+共同点只有一句：谁持有 key，谁就承担数据责任。这一列决定了你是"用别人搭好的管子"，还是"自己接一根"。
+
+
 ## 为什么是这个
 
 - `@modelcontextprotocol/sdk` 周下载 **89,463,331**，已经同时超过 `@anthropic-ai/sdk`（70.7M）与 `openai`（58.8M）。接入层已经标准化到协议，做工具的人押协议不押厂商。
