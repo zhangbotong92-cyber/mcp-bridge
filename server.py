@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 mcp-bridge — 把任意 OpenAI 兼容的模型端点暴露成 MCP 工具。
@@ -27,7 +27,7 @@ import urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 SERVER_NAME = "mcp-bridge"
-SERVER_VERSION = "0.3.1"
+SERVER_VERSION = "0.3.2"
 DEFAULT_PROTOCOL = "2024-11-05"
 
 PRICE_NOTE = "价格为示例值，按 1M tokens 计，单位人民币；上线前请按厂商官网更新。"

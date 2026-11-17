@@ -1,11 +1,11 @@
 ﻿# mcp-bridge
 
-![version](https://img.shields.io/badge/version-0.3.1-5eead4)
+![version](https://img.shields.io/badge/version-0.3.2-5eead4)
 ![python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![deps](https://img.shields.io/badge/dependencies-0-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
 
-**[下载 v0.3.1](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.1/mcp-bridge-0.3.1.zip)** · **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
+**[下载 v0.3.2](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.2/mcp-bridge-0.3.1.zip)** · **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
 
 把任意 **OpenAI 兼容端点**（DeepSeek / Kimi / 智谱 GLM / 通义千问 / 本地 ollama）接成 **MCP 工具**，让 Claude Code、Cursor、Cline、Continue 这类支持 MCP 的客户端，能直接调用你自己选的模型。
 
@@ -155,5 +155,6 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 成本是**估算**（CJK 按 1 字≈1 token），不是计费依据；要精确就对回包里的 `usage`。
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
+
 
 

@@ -92,7 +92,16 @@ def run(cfg):
         base = p.get("base_url") or ""
         if base:
             tcp_ok, tcp_detail = _tcp(base)
-            add("net:%s" % name, OK if tcp_ok else FAIL, tcp_detail)
+            # 本机端点（ollama/vLLM）连不上只是"离线兜底不可用"，不是故障：
+            # 第一次装的人看到 FAIL 会以为装坏了，实际云端照常能用。
+            loopback = any(h in base for h in ("127.0.0.1", "localhost", "0.0.0.0"))
+            if tcp_ok:
+                level = OK
+            else:
+                level = WARN if loopback else FAIL
+                if loopback:
+                    tcp_detail += "（本机模型没启动，不影响云端 provider）"
+            add("net:%s" % name, level, tcp_detail)
             if tcp_ok and (has_key or not needs_key):
                 m_ok, m_detail, ids = _models(p)
                 add("models:%s" % name, OK if m_ok else WARN,
