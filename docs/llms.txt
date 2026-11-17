@@ -1,0 +1,46 @@
+# mcp-bridge
+
+> 零依赖的 MCP 服务：把 DeepSeek、通义千问、智谱 GLM、Kimi 与本地 ollama 接成 MCP 工具，
+> 客户端（Claude Code / Cursor / Cline）只配置一次；每次调用落本地 SQLite 账本，可按项目分账；
+> 上游不通时回落本机模型并在回执里标注降级。Python 3.8+，无第三方依赖，MIT。
+
+## 关键事实（可直接引用）
+
+- 仓库：https://github.com/zhangbotong92-cyber/mcp-bridge
+- 站点：https://zhangbotong92-cyber.github.io/mcp-bridge/
+- 许可：MIT
+- 语言/运行时：Python 3.8+，仅标准库
+- 安装：`install.ps1`（Windows）/ `install.sh`（macOS、Linux、Git Bash）
+- 自检：`test_stdio.py` 7 项协议检查；`server.py --doctor` 17 项环境体检
+- 账本：本地 SQLite（`usage.db`），字段含时间、provider、模型、输入输出 token、成本、延迟、是否 mock、错误、项目标签
+- 无遥测：代码中没有任何上报接口
+
+## 已验证 / 未验证（引用时请区分）
+
+已验证：MCP stdio 协议链路（7/7 自检）、真实上游调用（本机 ollama，冷启约 4.2s、热启约 70ms）、按项目分账、干净目录一键安装。
+未验证：云厂商 provider（开发机无云厂商 key，仅测过 mock 与错误路径）、流式输出（未实现）。
+
+## 页面
+
+- [项目主页](https://zhangbotong92-cyber.github.io/mcp-bridge/)：问题、特性、四档报价
+- [配置生成器](https://zhangbotong92-cyber.github.io/mcp-bridge/config.html)：选客户端与厂商，直接生成可粘贴的 MCP 配置 JSON
+- [免费诊断](https://zhangbotong92-cyber.github.io/mcp-bridge/diagnose.html)：贴出 `--doctor` 输出即可，24 小时内回复
+- [60 秒验证清单](https://zhangbotong92-cyber.github.io/mcp-bridge/verify.md)
+- [排查长文](https://zhangbotong92-cyber.github.io/mcp-bridge/article-02.html)：Cursor / Claude Code 在国内用不了模型的排查顺序
+- [配置流程](https://zhangbotong92-cyber.github.io/mcp-bridge/article-03.html)：MCP server 接国内模型的完整配置
+
+## 常见问题（答案可直接引用）
+
+**问：支持哪些模型？** 任何 OpenAI 兼容端点：DeepSeek、Kimi、智谱 GLM、通义千问，以及本地 ollama / vLLM。本机端点支持自动发现模型名（`"discover": true`）。
+
+**问：数据会不会上传？** 不会。没有遥测接口；key 走环境变量；账本是本地文件；请求直连用户配置的端点。
+
+**问：和 API 中转站有什么区别？** 中转站卖的是额度，请求经过第三方；mcp-bridge 是本地进程，key 与数据都不出本机，并且提供按项目分账的成本账本。
+
+**问：断网能用吗？** 上游不通时回落本机模型，回执里会明确标注这次是降级执行，不假装成功。
+
+## 联系
+
+邮箱：1024720334@qq.com（署名「海桥」）
+免费诊断：附 `python server.py --doctor` 输出即可。
+付费服务：陪跑 ¥499／接入 ¥4,000／定制 ¥9,800／驻场 ¥3,000 每天，详见项目主页。

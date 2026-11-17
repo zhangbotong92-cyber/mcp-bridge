@@ -1,3 +1,6 @@
 ﻿User-agent: *
 Allow: /
 Sitemap: https://zhangbotong92-cyber.github.io/mcp-bridge/sitemap.xml
+# LLM crawlers: plain-text project summary
+# https://zhangbotong92-cyber.github.io/mcp-bridge/llms.txt
+
