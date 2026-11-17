@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cursor / Claude Code 在国内用不了模型？按这个顺序查（2026）</title>
+<meta name="description" content="Cursor 提示 Model not available、Claude Code 报 401 或连不上？九成是三层配置里的某一步。给出可直接执行的排查顺序，以及什么时候该换成模型接入层。">
+<meta name="keywords" content="Cursor 国内 用不了, Claude Code 401, Model not available, Base URL 配置, API Key, 模型接入, MCP">
+<link rel="canonical" href="https://zhangbotong92-cyber.github.io/mcp-bridge/article-02.html">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"TechArticle",
+  "headline":"Cursor / Claude Code 在国内用不了模型？按这个顺序查",
+  "datePublished":"2026-11-17",
+  "inLanguage":"zh-CN",
+  "author":{"@type":"Person","name":"海桥","email":"1024720334@qq.com"},
+  "publisher":{"@type":"Organization","name":"Ocean Relay"}
+}
+</script>
+<style>
+  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.75}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 80px}
+  h1{font-size:32px;line-height:1.3;margin:0 0 10px}
+  .meta{color:#93a4b8;font-size:14px;margin-bottom:34px}
+  h2{font-size:21px;margin:38px 0 12px;border-left:3px solid #5eead4;padding-left:12px}
+  p,li{font-size:16px;color:#cfdae6}
+  code{background:#151f29;padding:2px 6px;border-radius:5px;font-size:14px;color:#5eead4}
+  pre{background:#070c11;border:1px solid #1e2b36;border-radius:10px;padding:14px;overflow:auto;font-size:13px;color:#b8c7d6}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{text-align:left;padding:10px;border-bottom:1px solid #1e2b36;vertical-align:top}
+  th{color:#93a4b8}
+  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:22px 0}
+  a{color:#5eead4}
+  .cta{background:#0e2220;border:1px solid #5eead4;border-radius:12px;padding:20px;margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Cursor / Claude Code 在国内用不了模型？按这个顺序查</h1>
+<p class="meta">2026-11-17 · 海桥 · 排查耗时按顺序递增，前两步就能解决大多数</p>
+
+<p>先给结论：这类问题九成不是"网络坏了"，而是三层配置里的某一层没对上。按下面顺序查，每步都有明确的判据。</p>
+
+<h2>第一层：客户端有没有真的拿到 key</h2>
+<p>最容易踩的坑：你在系统里设了环境变量，<strong>但客户端进程根本读不到</strong>。GUI 程序经常不继承你终端里的变量。</p>
+<pre>curl -H "Authorization: Bearer $KEY" $BASE/chat/completions \
+  -d '{"model":"...","messages":[{"role":"user","content":"hi"}]}'</pre>
+<p>curl 通了 → 问题在客户端；curl 也不通 → 问题在 key 或地址。这一条能省掉一半时间。</p>
+
+<h2>第二层：模型名对不对</h2>
+<p><code>Model not available</code>、404 这类，八成是名字不匹配。各家对同一模型的写法不一样，本地 ollama 更是——<code>ollama list</code> 里显示什么就得写什么，不能照抄教程。</p>
+<p>两个动作：① 请求一次 <code>/models</code> 看服务端认哪些名字；② 把返回的 id 原样填回去。</p>
+
+<h2>第三层：Base URL 的三个细节</h2>
+<table>
+  <tr><th>细节</th><th>错误表现</th></tr>
+  <tr><td>末尾多一个斜杠</td><td>404 或 401，容易误判成 key 问题</td></tr>
+  <tr><td>该不该带 <code>/v1</code></td><td>带错报 404，不报"地址错"</td></tr>
+  <tr><td>http 还是 https</td><td>本地服务写 https 会直接连不上</td></tr>
+</table>
+
+<h2>都不是？还有一层：协议协商</h2>
+<p>Cursor / Claude Code 里有个隐藏坑：HTTP/2 协商失败会表现为"请求发出去了但没回"，超时报错里看不出任何线索。把客户端设置里的 HTTP Compatibility Mode 切到 1.1 再试一次，很多人这一步就好了。</p>
+
+<h2>为什么反复出现：客户端绑死了模型</h2>
+<p>上面每一步都是"客户端 ↔ 模型"之间的对接细节。只要你的客户端绑死某一家，每次换模型、每次对方改区域策略，这些细节就要重来一遍。</p>
+<div class="box">
+<p>稳的做法是把模型层抽出来：客户端只认一个 OpenAI 兼容入口，背后接哪家随时换。这就是我做 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a> 的原因——它是 MCP 服务，把 DeepSeek / 通义 / 智谱 / Kimi 与本地 ollama 收成一个入口，客户端只配一次；每次调用落本地账本，能按项目分账；上游不通时回落本机模型，并在回执里标注降级。</p>
+<p>零依赖，Python 3.8+，带 17 项环境体检（<code>--doctor</code>），Windows / macOS / Linux 都有一键安装脚本。</p>
+</div>
+
+<h2>装完怎么确认成没成</h2>
+<p>看 <a href="verify.md">60 秒验证清单</a>：自检 7/7 → 体检 0 失败 → mock 调通 → 账本能出数 → 客户端能看到工具。任何一步不对，那一步的输出就能定位问题。</p>
+
+<div class="cta">
+<p><strong>卡在某一步？把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。</strong></p>
+<p>要我远程帮你配通：¥499，三小时，跑不通不收费。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
+</div>
+
+<p class="meta">—— 海桥 · 做模型接入层 · <a href="./">项目主页</a></p>
+</div>
+</body>
+</html>
