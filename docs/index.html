@@ -115,7 +115,7 @@ ACME-官网             1           11            8     0.0000        0</code></
 
 <section>
   <div class="wrap">
-    <h2>它解决的三件事</h2>
+    <h2>它解决的四件事</h2>
     <div class="grid">
       <div class="card">
         <h3>换模型不用改配置</h3>
@@ -128,6 +128,10 @@ ACME-官网             1           11            8     0.0000        0</code></
       <div class="card">
         <h3>断网不瘫</h3>
         <p>上游不通时自动落到本机 ollama，并在回执里明确标注降级——不假装成功。</p>
+      </div>
+      <div class="card">
+        <h3>数据不出本机</h3>
+        <p>没有遥测、没有上报接口；key 走环境变量，账本是本地 SQLite，请求直连你配置的端点。</p>
       </div>
     </div>
   </div>
