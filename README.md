@@ -32,7 +32,7 @@ python server.py --report 7      # 最近 7 天的调用与花费
 
 没配任何 key 也能跑通链路（自动降级 mock），可以先看工具列表再决定填哪家。
 
-装完不确定成没成？→ **[60 秒验证清单](docs/verify.md)**
+装完不确定成没成？→ **[60 秒验证清单](docs/verify.md)**　卡住了？→ **[把输出发我，免费诊断](https://zhangbotong92-cyber.github.io/mcp-bridge/diagnose.html)**
 
 ## 数据在哪：不出本机，不上报
 

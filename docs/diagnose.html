@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP / Claude Code / Cursor 报错：把输出发我，免费看一眼</title>
+<meta name="description" content="配 MCP、接国内模型、401、404、Model not available、连接超时——把三条命令的输出发过来，我回一条具体诊断。免费，24 小时内回。">
+<meta name="keywords" content="MCP 报错, Claude Code 401, Model not available, Cursor 连不上, MCP 配置排查, 免费诊断">
+<link rel="canonical" href="https://zhangbotong92-cyber.github.io/mcp-bridge/diagnose.html">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebPage",
+  "name":"免费诊断：把输出发我",
+  "inLanguage":"zh-CN",
+  "author":{"@type":"Person","name":"海桥","email":"1024720334@qq.com"}
+}
+</script>
+<style>
+  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.78}
+  .wrap{max-width:740px;margin:0 auto;padding:56px 22px 80px}
+  h1{font-size:30px;line-height:1.36;margin:0 0 12px}
+  h2{font-size:19px;margin:38px 0 12px}
+  p,li{font-size:16px;color:#cfdae6}
+  code{background:#151f29;padding:2px 6px;border-radius:5px;font-size:14px;color:#5eead4}
+  pre{background:#070c11;border:1px solid #1e2b36;border-radius:10px;padding:14px;overflow:auto;font-size:13px;color:#b8c7d6}
+  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:22px 0}
+  a{color:#5eead4}
+  ol{padding-left:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>把报错发我，免费看一眼</h1>
+
+<p>配 MCP、接国内模型，卡在某一步出不来。这种情况我能帮上忙，而且不收费——先看清楚问题在哪，比什么都重要。</p>
+
+<h2>发之前跑三条命令</h2>
+
+<p>如果你已经在用 mcp-bridge，这三条就够我定位：</p>
+
+<pre>python test_stdio.py           # 协议自检，七项
+python server.py --doctor      # 环境体检，十七项（重点）
+python server.py --report 1    # 账本里有没有记录</pre>
+
+<p>没用过也没关系。把你在客户端里看到的报错原文贴出来，加上系统版本和客户端名字，我照样能猜个八九成。</p>
+
+<h2>贴这四个东西，一次就说清</h2>
+
+<ol>
+  <li><code>--doctor</code> 的完整输出（十七行，别删减，WARN 也有信息）</li>
+  <li>系统：Windows 10 / 11、macOS 还是 Linux；Python 版本</li>
+  <li>客户端：Claude Code、Cursor、Cline 还是别的</li>
+  <li>报错原文：截图里的那行字，或者日志里复制出来</li>
+</ol>
+
+<div class="box">
+<p>有些东西不用发：API key（打码或者删掉）、你的配置里的私密地址、任何客户数据。诊断用不着这些。</p>
+</div>
+
+<h2>发到哪</h2>
+
+<p>两个地方，你顺手哪个用哪个：</p>
+
+<ul>
+  <li><a href="mailto:1024720334@qq.com?subject=mcp-bridge%20diagnose">1024720334@qq.com</a>（邮件标题不用讲究）</li>
+  <li><a href="https://github.com/zhangbotong92-cyber/mcp-bridge/issues/1">仓库的 issue #1</a>（喜欢公开讨论就发这里）</li>
+</ul>
+
+<p>我一般在 24 小时内回，回的是"哪一层出的问题 + 下一步做什么"，不是"欢迎使用我们的产品"。</p>
+
+<h2>三种最常见的，你可能自己就能解决</h2>
+
+<p><strong>401 / 鉴权失败。</strong>九成是 key 没进客户端进程——系统环境变量和程序自己的环境变量是两回事。用 curl 直连打一次，通了就是客户端的问题。</p>
+
+<p><strong>Model not available / 404。</strong>模型名对不上。教程里的名字经常过期，直接问服务端要：<code>curl $BASE/models</code>，把返回的 id 原样填回去。</p>
+
+<p><strong>一直转圈然后超时。</strong>HTTP/2 协商失败也会这样，报错里一点线索没有。把客户端的 HTTP 兼容模式切到 1.1 试一次，这一步不改任何配置，试错成本是零。</p>
+
+<h2>如果你想让我直接动手</h2>
+
+<p>诊断免费，动手配通是收费的：¥499，三小时一对一，跑不通不收费。有些问题打字说不清，共享屏幕十分钟比来回十封邮件快。</p>
+
+<p>详情在<a href="./">项目主页</a>的报价那一段。</p>
+
+<p style="color:#93a4b8;font-size:14px;margin-top:34px">—— 海桥，做模型接入层。开源版免费，诊断免费。真要收钱的地方会提前说。</p>
+</div>
+</body>
+</html>
