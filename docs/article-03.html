@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Server 怎么接国内模型：DeepSeek / 通义 / 智谱 / Kimi 配置全流程</title>
+<meta name="description" content="从零把 MCP server 接到国内模型：配置文件写什么、客户端怎么注册、模型名从哪来、401 和 404 分别怎么排查，附可直接跑的自检命令。">
+<meta name="keywords" content="MCP server 国内模型, MCP 配置, DeepSeek MCP, 通义 MCP, 智谱 GLM, Kimi MCP, Claude Code MCP 配置, Cursor MCP">
+<link rel="canonical" href="https://zhangbotong92-cyber.github.io/mcp-bridge/article-03.html">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"TechArticle",
+  "headline":"MCP Server 怎么接国内模型：配置全流程",
+  "datePublished":"2026-11-17",
+  "inLanguage":"zh-CN",
+  "author":{"@type":"Person","name":"海桥","email":"1024720334@qq.com"},
+  "publisher":{"@type":"Organization","name":"Ocean Relay"}
+}
+</script>
+<style>
+  body{margin:0;background:#0b1116;color:#e8eef6;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.75}
+  .wrap{max-width:760px;margin:0 auto;padding:56px 22px 80px}
+  h1{font-size:31px;line-height:1.32;margin:0 0 10px}
+  .meta{color:#93a4b8;font-size:14px;margin-bottom:32px}
+  h2{font-size:20px;margin:36px 0 12px;border-left:3px solid #5eead4;padding-left:12px}
+  p,li{font-size:16px;color:#cfdae6}
+  code{background:#151f29;padding:2px 6px;border-radius:5px;font-size:14px;color:#5eead4}
+  pre{background:#070c11;border:1px solid #1e2b36;border-radius:10px;padding:14px;overflow:auto;font-size:13px;color:#b8c7d6}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{text-align:left;padding:10px;border-bottom:1px solid #1e2b36;vertical-align:top}
+  th{color:#93a4b8}
+  .box{background:#121b23;border:1px solid #1e2b36;border-radius:10px;padding:16px 18px;margin:22px 0}
+  a{color:#5eead4}
+  .cta{background:#0e2220;border:1px solid #5eead4;border-radius:12px;padding:20px;margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>MCP Server 怎么接国内模型：一步一步配</h1>
+<p class="meta">2026-11-17 · 海桥 · 配置片段可直接复制，命令都实测过</p>
+
+<p>这篇只解决一件事：让你的 MCP 客户端（Claude Code / Cursor / Cline）调到国内的模型。不讨论"为什么要 MCP"，直接给能跑的东西。</p>
+
+<h2>第 0 步：先确认你要的是哪一层</h2>
+<table>
+  <tr><th>你想要的</th><th>要配的是</th></tr>
+  <tr><td>客户端能用国内模型发请求</td><td>一个 OpenAI 兼容的 <strong>模型端点</strong>（Base URL + Key + 模型名）</td></tr>
+  <tr><td>客户端能调用外部工具（读文件、查库、调接口）</td><td>一个 <strong>MCP server</strong></td></tr>
+  <tr><td>两者都要</td><td>能同时做这两件事的桥（下文给的就是）</td></tr>
+</table>
+
+<h2>第 1 步：拿到三样东西</h2>
+<pre>Base URL   例如 https://api.deepseek.com/v1
+API Key    各家控制台自己签
+模型名     从 /models 接口拿，不要照抄教程</pre>
+
+<p>取模型名这一步别猜：</p>
+<pre>curl -H "Authorization: Bearer $KEY" $BASE/models</pre>
+<p>返回里 <code>data[].id</code> 就是能用的名字。本地 ollama 同理：<code>ollama list</code> 显示什么就写什么。</p>
+
+<h2>第 2 步：写配置文件</h2>
+<pre>{
+  "providers": {
+    "deepseek": {
+      "base_url": "https://api.deepseek.com/v1",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "models": ["deepseek-chat"],
+      "prices": { "deepseek-chat": { "in": 2.0, "out": 8.0 } }
+    },
+    "local": {
+      "base_url": "http://127.0.0.1:11434/v1",
+      "discover": true,
+      "models": []
+    }
+  }
+}</pre>
+
+<div class="box">
+<p>两个关键决定：</p>
+<p>① <strong>key 写在环境变量名里</strong>（<code>api_key_env</code>），不要明码写进文件——文件会被提交、被分享、被备份。</p>
+<p>② <code>discover: true</code> 让程序自己去问端点有哪些模型，省掉"名字猜错"这一整类问题。</p>
+</div>
+
+<h2>第 3 步：注册到客户端</h2>
+<pre>{
+  "mcpServers": {
+    "bridge": {
+      "command": "python",
+      "args": ["/绝对路径/server.py", "--config", "/绝对路径/config.json"],
+      "env": { "DEEPSEEK_API_KEY": "sk-..." }
+    }
+  }
+}</pre>
+<p>文件位置：Claude Code 用 <code>~/.claude.json</code> 或项目里的 <code>.mcp.json</code>；Cursor 用 <code>~/.cursor/mcp.json</code>。</p>
+<p><strong>改完必须重启客户端</strong>，MCP 配置不做热加载；路径必须是绝对路径。</p>
+
+<h2>第 4 步：三个高频报错怎么读</h2>
+<table>
+  <tr><th>报错</th><th>实际原因</th><th>动作</th></tr>
+  <tr><td>401 / Unauthorized</td><td>key 没进客户端进程，或 base 多/少了 <code>/v1</code></td><td>先用 curl 直连验证，再检查客户端 <code>env</code> 段</td></tr>
+  <tr><td>404 / model not found</td><td>模型名不匹配</td><td>打一次 <code>/models</code>，原样抄 id</td></tr>
+  <tr><td>超时 / local proxy failed</td><td>HTTP/2 协商或代理层</td><td><code>curl -v</code> 看卡在 DNS/TCP/TLS；客户端切 HTTP 1.1</td></tr>
+</table>
+
+<h2>第 5 步：确认真的通了</h2>
+<pre>python test_stdio.py      # 协议自检 7 项
+python server.py --doctor # 环境体检 17 项
+python server.py --report 1   # 看账，确认每次调用都记下来了</pre>
+<p>三步都过，说明"客户端 → MCP server → 模型"这条链是通的。详细的期望输出见 <a href="verify.md">60 秒验证清单</a>。</p>
+
+<div class="box">
+<p>这套东西我打包成了 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a>：零第三方依赖，Python 3.8+，Windows / macOS / Linux 都有一键安装脚本，跑完自动做上面这五步里的检查。MIT 协议，代码可以直接读。</p>
+</div>
+
+<div class="cta">
+<p><strong>照着配还是不通？把 <code>python server.py --doctor</code> 的输出发我，免费看一眼。</strong></p>
+<p>要我远程帮你配通：¥499，三小时，跑不通不收费。邮箱 <a href="mailto:1024720334@qq.com">1024720334@qq.com</a>。</p>
+</div>
+
+<p class="meta">—— 海桥 · 做模型接入层 · <a href="./">项目主页</a></p>
+</div>
+</body>
+</html>
