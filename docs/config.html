@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP 配置生成器：Claude Code / Cursor 接国内模型</title>
+<meta name="description" content="选客户端、选模型厂商，直接生成可粘贴的 MCP 配置 JSON。支持 DeepSeek、Kimi、智谱 GLM、通义千问与本地 ollama，纯浏览器本地生成，不上传任何数据。">
+<meta name="keywords" content="MCP 配置生成器, Claude Code MCP 配置, Cursor MCP 配置, DeepSeek MCP, 国内模型 MCP, mcpServers">
+<link rel="canonical" href="https://zhangbotong92-cyber.github.io/mcp-bridge/config.html">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebApplication",
+  "name":"MCP 配置生成器",
+  "applicationCategory":"DeveloperApplication",
+  "operatingSystem":"Any",
+  "inLanguage":"zh-CN",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},
+  "author":{"@type":"Person","name":"海桥","email":"1024720334@qq.com"}
+}
+</script>
+<style>
+  :root{--bg:#0b1116;--panel:#121b23;--line:#1e2b36;--text:#e8eef6;--muted:#93a4b8;--accent:#5eead4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.7}
+  .wrap{max-width:820px;margin:0 auto;padding:48px 22px 80px}
+  h1{font-size:29px;margin:0 0 8px}
+  .meta{color:var(--muted);font-size:14px;margin-bottom:28px}
+  h2{font-size:18px;margin:30px 0 10px;border-left:3px solid var(--accent);padding-left:10px}
+  label{display:block;font-size:13px;color:var(--muted);margin:16px 0 6px}
+  select,input{width:100%;background:#0e171f;color:var(--text);border:1px solid var(--line);
+               border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:620px){.row{grid-template-columns:1fr}}
+  pre{background:#070c11;border:1px solid var(--line);border-radius:10px;padding:14px;
+      overflow:auto;font-size:13px;color:#b8c7d6;position:relative}
+  button{background:var(--accent);color:#04211c;border:0;border-radius:8px;padding:8px 14px;
+         font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .note{color:var(--muted);font-size:13px}
+  a{color:var(--accent)}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>MCP 配置生成器</h1>
+<p class="meta">选两下，拿到能直接粘的 JSON。全部在浏览器本地生成，不联网、不上传。</p>
+
+<h2>1. 选你的环境</h2>
+<div class="row">
+  <div>
+    <label>客户端</label>
+    <select id="client">
+      <option value="claude">Claude Code（~/.claude.json 或项目 .mcp.json）</option>
+      <option value="cursor">Cursor（~/.cursor/mcp.json）</option>
+      <option value="cline">Cline（VS Code 插件设置）</option>
+    </select>
+  </div>
+  <div>
+    <label>模型厂商</label>
+    <select id="provider">
+      <option value="deepseek">DeepSeek</option>
+      <option value="moonshot">Kimi（月之暗面）</option>
+      <option value="zhipu">智谱 GLM</option>
+      <option value="dashscope">通义千问</option>
+      <option value="local">本地 ollama</option>
+    </select>
+  </div>
+</div>
+
+<label>server.py 的绝对路径（换成你自己的）</label>
+<input id="srv" value="D:\mcp-bridge\server.py">
+
+<label>config.json 的绝对路径</label>
+<input id="cfg" value="D:\mcp-bridge\config.json">
+
+<h2>2. 客户端配置（粘进客户端）</h2>
+<pre id="out-client"></pre>
+<button id="copy1">复制客户端配置</button>
+
+<h2>3. provider 配置（写进 config.json）</h2>
+<pre id="out-provider"></pre>
+<button id="copy2">复制 provider 片段</button>
+
+<h2>4. 然后做什么</h2>
+<div class="step">
+  <strong>重启客户端。</strong> MCP 配置不做热加载，改完必须重启，路径必须是绝对路径。
+</div>
+<div class="step">
+  <strong>验证。</strong> 在客户端里让它调用一次 <code>bridge_models</code>，能列出 provider 就说明接好了。<br>
+  命令行侧可以跑 <code>python server.py --doctor</code>，17 项检查会指出卡在哪。
+</div>
+<div class="step">
+  <strong>没有 server.py？</strong> 这个配置对应的是
+  <a href="https://github.com/zhangbotong92-cyber/mcp-bridge">mcp-bridge</a>（零依赖 MCP 服务，Python 3.8+，MIT）。
+  <a href="./">先看它是什么</a>，或直接 <a href="https://github.com/zhangbotong92-cyber/mcp-bridge/releases/latest">下载最新版</a>。
+</div>
+
+<p class="note" style="margin-top:26px">配完还有报错？<a href="article-02.html">排查顺序在这</a>；要人帮忙配：¥499 陪跑，<a href="mailto:1024720334@qq.com">发邮件</a>。</p>
+
+</div>
+
+<script>
+const PRESETS = {
+  deepseek:{name:"deepseek", base:"https://api.deepseek.com/v1", env:"DEEPSEEK_API_KEY", models:["deepseek-chat"]},
+  moonshot:{name:"moonshot", base:"https://api.moonshot.cn/v1", env:"MOONSHOT_API_KEY", models:["kimi-k2-turbo"]},
+  zhipu:{name:"zhipu", base:"https://open.bigmodel.cn/api/paas/v4", env:"ZHIPU_API_KEY", models:["glm-4.6"]},
+  dashscope:{name:"dashscope", base:"https://dashscope.aliyuncs.com/compatible-mode/v1", env:"DASHSCOPE_API_KEY", models:["qwen-plus"]},
+  local:{name:"local", base:"http://127.0.0.1:11434/v1", env:"", models:[], discover:true}
+};
+
+function el(id){ return document.getElementById(id); }
+
+function renderClient(){
+  const p = PRESETS[el("provider").value];
+  const env = p.env ? { [p.env]: "sk-你的key" } : {};
+  const obj = {
+    mcpServers: {
+      bridge: {
+        command: "python",
+        args: [el("srv").value, "--config", el("cfg").value],
+        env: env
+      }
+    }
+  };
+  const client = el("client").value;
+  let hint = "";
+  if (client === "cline") { hint = "// Cline: 设置 → MCP Servers → 编辑 JSON，粘 mcpServers 内部即可\n"; }
+  el("out-client").textContent = hint + JSON.stringify(obj, null, 2);
+}
+
+function renderProvider(){
+  const p = PRESETS[el("provider").value];
+  const block = { [p.name]: { base_url: p.base, api_key_env: p.env, models: p.models } };
+  if (p.discover) { block[p.name].discover = true; block[p.name].models = []; }
+  el("out-provider").textContent = JSON.stringify({ providers: block }, null, 2);
+}
+
+function refresh(){ renderClient(); renderProvider(); }
+
+function copy(node){
+  const text = node.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(()=>{ node.style.outline="2px solid #5eead4";
+      setTimeout(()=>{ node.style.outline="none"; }, 700); });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); document.body.removeChild(ta);
+  }
+}
+
+["client","provider","srv","cfg"].forEach(id=>{
+  el(id).addEventListener("input", refresh);
+  el(id).addEventListener("change", refresh);
+});
+el("copy1").addEventListener("click", ()=>copy(el("out-client")));
+el("copy2").addEventListener("click", ()=>copy(el("out-provider")));
+refresh();
+</script>
+</body>
+</html>
