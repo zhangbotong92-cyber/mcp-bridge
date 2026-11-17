@@ -1,4 +1,4 @@
-# mcp-bridge
+﻿# mcp-bridge
 
 ![version](https://img.shields.io/badge/version-0.3.1-5eead4)
 ![python](https://img.shields.io/badge/python-3.8%2B-blue)
@@ -11,16 +11,21 @@
 
 零第三方依赖，Python 3.8+ 直接跑。没配 key 也能先跑通链路（自动降级 mock）。
 
-## 需要人帮你配通？
+## 30 秒跑起来
 
-开源版自己折腾就行。如果你想要有人把这套接到你现有环境里（装桥、配模型、客户端接上、留一份能复用的配置）：
+```powershell
+# Windows 一条命令：查环境 -> 生成配置 -> 打印客户端配置 -> 7 项自检 -> 环境体检
+powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
+```
 
-- **陪跑 ¥499**：3 小时一对一远程，跑不通不收费
-- **接入 ¥4,000** / **定制 ¥9,800** / **驻场 ¥3,000 一天**
-- 详细交付内容与条款：[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)
-- 联系：`1024720334@qq.com`（署名 海桥）
+装完先跑一次体检，它会告诉你到底卡在哪：
 
-> 先跑 `python server.py --doctor`，把输出发过来，我一眼能看出卡在哪。
+```bash
+python server.py --doctor        # 17 项：python / 配置 / key / 端点 / 模型 / 客户端
+python server.py --report 7      # 最近 7 天的调用与花费
+```
+
+没配任何 key 也能跑通链路（自动降级 mock），可以先看工具列表再决定填哪家。
 
 ## 为什么是这个
 
@@ -126,6 +131,16 @@ config.sample.json # provider 模板：deepseek / moonshot / zhipu / dashscope /
 test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> 错误路径
 ```
 
+## 需要人帮你配通？
+
+开源版自己折腾就行。如果你想要有人把这套接到你现有环境里（装桥、配模型、客户端接上、留一份能复用的配置）：
+
+- **陪跑 ¥499**：3 小时一对一远程，跑不通不收费
+- **接入 ¥4,000** / **定制 ¥9,800** / **驻场 ¥3,000 一天**
+- 详细交付内容与条款：[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)
+- 联系：`1024720334@qq.com`（署名 海桥）
+
+> 先跑 `python server.py --doctor`，把输出发过来，我一眼能看出卡在哪。
 ## 设计上的几个硬决定
 
 1. **stdout 只走协议，日志全走 stderr。** MCP stdio 的经典翻车点：一行日志写进 stdout，客户端直接解析失败。
@@ -140,4 +155,5 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 成本是**估算**（CJK 按 1 字≈1 token），不是计费依据；要精确就对回包里的 `usage`。
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
+
 
