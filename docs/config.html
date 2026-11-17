@@ -137,8 +137,14 @@ function renderClient(){
   if (Object.keys(env).length) { server.env = env; }   // 本地端点不需要 env，就别塞空对象
   const obj = { mcpServers: { bridge: server } };
   const client = el("client").value;
-  let hint = "";
-  if (client === "cline") { hint = "// Cline: 设置 → MCP Servers → 编辑 JSON，粘 mcpServers 内部即可\n"; }
+  const HINTS = {
+    claude: "// Claude Code: 放到 ~/.claude.json 或项目里的 .mcp.json\n",
+    cursor: "// Cursor: 放到 ~/.cursor/mcp.json，改完重启\n",
+    cline: "// Cline: 设置 → MCP Servers → 编辑 JSON，粘 mcpServers 内部即可\n",
+    windsurf: "// Windsurf: 放到 ~/.codeium/windsurf/mcp_config.json，改完重启\n",
+    continue: "// Continue: config.json 里的 mcpServers 段，重启 IDE\n"
+  };
+  let hint = HINTS[client] || "";
   el("out-client").textContent = hint + JSON.stringify(obj, null, 2);
 }
 
