@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -59,6 +59,14 @@ python server.py --report 1    # 账本里有没有记录</pre>
 <p>有些东西不用发：API key（打码或者删掉）、你的配置里的私密地址、任何客户数据。诊断用不着这些。</p>
 </div>
 
+<h2>懒得描述？让程序自己写</h2>
+
+<p>如果已经装了解压包，跑这一条：</p>
+
+<pre>python report.py</pre>
+
+<p>它会把系统信息、体检输出、自检结果、客户端配置状态整理成一个 txt 文件，**并且自动脱敏** key、token 和路径里的用户名。生成完直接贴过来就行，不用你组织语言。</p>
+
 <h2>发到哪</h2>
 
 <p>两个地方，你顺手哪个用哪个：</p>
@@ -88,3 +96,4 @@ python server.py --report 1    # 账本里有没有记录</pre>
 </div>
 </body>
 </html>
+

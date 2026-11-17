@@ -1,11 +1,11 @@
 ﻿# mcp-bridge
 
-![version](https://img.shields.io/badge/version-0.3.3-5eead4)
+![version](https://img.shields.io/badge/version-0.3.4-5eead4)
 ![python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![deps](https://img.shields.io/badge/dependencies-0-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
 
-**[下载 v0.3.3](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.3/mcp-bridge-0.3.3.zip)** · **[配置生成器](https://zhangbotong92-cyber.github.io/mcp-bridge/config.html)**（选两下出 JSON）· **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
+**[下载 v0.3.4](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.4/mcp-bridge-0.3.4.zip)** · **[配置生成器](https://zhangbotong92-cyber.github.io/mcp-bridge/config.html)**（选两下出 JSON）· **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
 
 把任意 **OpenAI 兼容端点**（DeepSeek / Kimi / 智谱 GLM / 通义千问 / 本地 ollama）接成 **MCP 工具**，让 Claude Code、Cursor、Cline、Continue 这类支持 MCP 的客户端，能直接调用你自己选的模型。
 
