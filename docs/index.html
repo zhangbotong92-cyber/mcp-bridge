@@ -81,8 +81,7 @@
     </p>
     <div class="cta">
       <a class="btn primary" href="diagnose.html">报错？免费诊断</a>
-      <a class="btn ghost" href="mailto:1024720334@qq.com?subject=mcp-bridge%20setup%20help">预约陪跑 ¥499</a>
-      <a class="btn ghost" href="#price">看报价</a>
+      <a class="btn ghost" href="https://github.com/zhangbotong92-cyber/mcp-bridge">GitHub（MIT，免费）</a>
       <a class="btn ghost" href="#start">30 秒看它跑</a>
     </div>
     <p class="note" style="margin-top:18px">
@@ -150,57 +149,39 @@ ACME-官网             1           11            8     0.0000        0</code></
   </div>
 </section>
 
-<section id="price">
+<section id="free">
   <div class="wrap">
-    <h2>报价</h2>
+    <h2>完全免费</h2>
+    <p>MIT 协议，没有付费版，没有功能阉割，也没有"高级支持请打款"。代码在这儿，装不装随你。</p>
     <table>
-      <tr><th>档位</th><th>价格</th><th>交付</th><th>工期</th></tr>
-      <tr>
-        <td>陪跑包</td><td class="price">¥499</td>
-        <td>3 小时一对一远程：装桥、配 1 家模型、客户端接上；留下能跑的配置 + 说明 + 自检脚本。跑不通不收费。</td>
-        <td>当天</td>
-      </tr>
-      <tr>
-        <td>接入包</td><td class="price">¥4,000</td>
-        <td>部署一套 mcp-bridge；配 2 个模型端点；客户端接入演示（含回滚）；7 天答疑。</td>
-        <td>2 个工作日</td>
-      </tr>
-      <tr>
-        <td>定制包</td><td class="price">¥9,800</td>
-        <td>含接入包全部；把你的 3–5 个业务接口封装成 MCP 工具；按项目统计费用；回归测试；30 天答疑。</td>
-        <td>5 个工作日</td>
-      </tr>
-      <tr>
-        <td>驻场包</td><td class="price">¥3,000 / 天</td>
-        <td>盘点 → 定位成本瓶颈 → 切换 → 上线验证。承诺：三天内账单降 40%，降不下来不收这三天。</td>
-        <td>按需</td>
-      </tr>
+      <tr><th>你在意什么</th><th>这里怎么做的</th></tr>
+      <tr><td>能不能自己看明白</td><td>单文件 Python，只用标准库，22 KB 正文；协议、路由、成本核算都在里面，没有隐藏层。</td></tr>
+      <tr><td>装坏了怎么办</td><td><code>--doctor</code> 17 项体检 + 7 项协议自检；卡住了开 issue 或发邮件，免费的。</td></tr>
+      <tr><td>数据会不会外流</td><td>没有遥测。key 走环境变量，账本是本地 SQLite，请求直连你自己配的端点。</td></tr>
+      <tr><td>以后涨价吗</td><td>不会。MIT 授权不可撤回，已发布的版本永远免费。</td></tr>
     </table>
-    <p class="note" style="margin-top:14px">
-      付款：工商银行 <span class="kbd">（转账信息私聊发送）</span>（海桥）。转账备注写「服务费 + 项目简称」，便于当天对账开工。
-      可开个人代开普票（1% 档）；专票需公司主体。
-    </p>
+    <p class="note" style="margin-top:14px">如果你确实需要有人把这套装进你的环境，可以写邮件问；那是例外，不是产品。</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
     <h2>常见问题</h2>
-    <details><summary>开源那么多，为什么要付费？</summary>
-      <p>开源给的是代码，付费买的是「你这套环境能跑起来」+ 出问题有人兜。你要是自己能调，直接用开源版，我不劝。</p></details>
+    <details><summary>为什么免费？</summary>
+      <p>因为它现在是我拿得出手的作品，不是货架上的商品。免费能换来更多真实使用和反馈，比收几笔钱有用。</p></details>
     <details><summary>数据会不会出境？</summary>
       <p>默认路径就是本机或你内网的端点；用量账本存在本地 SQLite，不上传。</p></details>
     <details><summary>支持哪些客户端？</summary>
       <p>任何支持 MCP 的：Claude Code、Cursor、Cline、Continue 等。配置片段由安装脚本直接生成。</p></details>
     <details><summary>跑不通怎么办？</summary>
-      <p>陪跑包当天跑不通不收钱；接入包按验收标准（能跑通 + 通过回归测试）结算。</p></details>
+      <p>跑 <code>python report.py</code> 生成脱敏报告，发到 issue 或邮箱；能远程看出来的我直接说怎么改。</p></details>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <p>海桥 · 1024720334@qq.com · 独立开发者，做模型接入层。</p>
-    <p class="note">页面最后更新：2026-11-17。报价 30 天内有效；价格含标准交付，不含模型 API 费用与你方服务器费用。</p>
+    <p class="note">页面最后更新：2026-11-18。MIT 协议，永久免费。</p>
   </div>
 </footer>
 
