@@ -1,0 +1,6 @@
+﻿__pycache__/
+*.pyc
+usage.db
+config.json
+report-*.txt
+*.zip
