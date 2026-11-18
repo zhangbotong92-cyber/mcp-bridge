@@ -188,9 +188,8 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
 
+---
 
+**相关项目**
 
-
-
-
-
+- [driftguard](https://github.com/zhangbotong92-cyber/driftguard)：自动写配置的工具该不该覆盖用户手改过的文件？三态判断 + 差异解释，13 个测试。
