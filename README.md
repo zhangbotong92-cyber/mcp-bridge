@@ -4,6 +4,7 @@
 ![python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![deps](https://img.shields.io/badge/dependencies-0-success)
 ![license](https://img.shields.io/badge/license-MIT-black)
+![ci](https://github.com/zhangbotong92-cyber/mcp-bridge/actions/workflows/ci.yml/badge.svg)
 
 **[下载 v0.3.4](https://github.com/zhangbotong92-cyber/mcp-bridge/releases/download/v0.3.4/mcp-bridge-0.3.4.zip)** · **[配置生成器](https://zhangbotong92-cyber.github.io/mcp-bridge/config.html)**（选两下出 JSON）· **[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)** · [English](README.en.md)
 
@@ -163,16 +164,14 @@ config.sample.json # provider 模板：deepseek / moonshot / zhipu / dashscope /
 test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> 错误路径
 ```
 
-## 需要人帮你配通？
+## 免费
 
-开源版自己折腾就行。如果你想要有人把这套接到你现有环境里（装桥、配模型、客户端接上、留一份能复用的配置）：
+MIT，没有付费版，没有功能阉割，也没有"高级支持请打款"。
 
-- **陪跑 ¥499**：3 小时一对一远程，跑不通不收费
-- **接入 ¥4,000** / **定制 ¥9,800** / **驻场 ¥3,000 一天**
-- 详细交付内容与条款：[在线说明页](https://zhangbotong92-cyber.github.io/mcp-bridge/)
-- 联系：`1024720334@qq.com`（署名 海桥）
+- 卡住了就开 [issue](https://github.com/zhangbotong92-cyber/mcp-bridge/issues)，或者把 `python server.py --doctor` 的输出发到 `1024720334@qq.com`，我看到会回
+- 想加 provider、改协议实现、补测试，直接提 PR，这里的 CI 会跑三系统两个 Python 版本
 
-> 先跑 `python server.py --doctor`，把输出发过来，我一眼能看出卡在哪。
+> 完整一点的排查顺序写在 [article-02](https://zhangbotong92-cyber.github.io/mcp-bridge/article-02.html) 和 [article-03](https://zhangbotong92-cyber.github.io/mcp-bridge/article-03.html)。
 ## 设计上的几个硬决定
 
 1. **stdout 只走协议，日志全走 stderr。** MCP stdio 的经典翻车点：一行日志写进 stdout，客户端直接解析失败。
@@ -188,8 +187,9 @@ test_stdio.py      # 冒烟测试：initialize -> tools/list -> tools/call -> �
 - 流式输出尚未实现（v0.2 目标）。
 - 无鉴权：这是本地 stdio 服务，不要把 `--http` 调试口暴露到公网。
 
----
 
-**相关项目**
 
-- [driftguard](https://github.com/zhangbotong92-cyber/driftguard)：自动写配置的工具该不该覆盖用户手改过的文件？三态判断 + 差异解释，13 个测试。
+
+
+
+
